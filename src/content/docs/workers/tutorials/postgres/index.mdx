@@ -42,9 +42,9 @@ This will prompt you to install the [`create-cloudflare`](https://www.npmjs.com/
 	file="c3-post-run-steps"
 	product="workers"
 	params={{
-		one: "Hello World example",
-		two: "Hello World Worker",
-		three: "TypeScript",
+		category: "hello-world",
+		type: "Hello World Worker",
+		lang: "TypeScript",
 	}}
 />
 
@@ -102,7 +102,7 @@ npx wrangler secret put DB_URL
 
 Set your `DB_URL` secret locally in a `.dev.vars` file as documented in [Local Development with Secrets](/workers/configuration/secrets/).
 
-```toml 
+```toml
 DB_URL="<ENTER YOUR POSTGRESQL CONNECTION STRING>"
 ```
 
@@ -136,7 +136,7 @@ npx wrangler secret put DB_PASSWORD
 Open your Worker's main file (for example, `worker.ts`) and import the `Client` class from the `pg` library:
 
 ```typescript
-import postgres from 'postgres'
+import postgres from "postgres";
 ```
 
 In the `fetch` event handler, connect to the PostgreSQL database using your chosen method, either the connection string or the explicit parameters.
@@ -144,7 +144,7 @@ In the `fetch` event handler, connect to the PostgreSQL database using your chos
 ### Use a connection string
 
 ```typescript
-const sql = postgres(env.DB_URL)
+const sql = postgres(env.DB_URL);
 ```
 
 ### Set explicit parameters
@@ -181,14 +181,14 @@ CREATE TABLE products (
 Replace the existing code in your `worker.ts` file with the following code:
 
 ```typescript
-import postgres from 'postgres'
+import postgres from "postgres";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		const sql = postgres(connStr)
+		const sql = postgres(connStr);
 
 		// Query the products table
-		const result = await sql`SELECT * FROM products;`
+		const result = await sql`SELECT * FROM products;`;
 
 		// Return the result as JSON
 		const resp = new Response(JSON.stringify(result), {
@@ -223,25 +223,25 @@ Assume the `products` table has the following columns: `id`, `name`, `descriptio
 Add the following code snippet inside the `fetch` event handler in your `worker.ts` file, before the existing query code:
 
 ```typescript {9-32}
-import postgres from 'postgres'
+import postgres from "postgres";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		const sql = postgres(env.DB_URL)
+		const sql = postgres(env.DB_URL);
 
-  	const url = new URL(request.url);
+		const url = new URL(request.url);
 		if (request.method === "POST" && url.pathname === "/products") {
 			// Parse the request's JSON payload
 			const productData = await request.json();
 
 			// Insert the new product into the database
 			const values = {
-				name: productData.name, 
-				description: productData.description, 
-				price: productData.price
+				name: productData.name,
+				description: productData.description,
+				price: productData.price,
 			};
 			const insertResult = await sql`
-				INSERT INTO products ${ sql(values) }
+				INSERT INTO products ${sql(values)}
 				RETURNING *
 			`;
 
@@ -255,7 +255,7 @@ export default {
 		}
 
 		// Query the products table
-		const result = await sql`SELECT * FROM products;`
+		const result = await sql`SELECT * FROM products;`;
 
 		// Return the result as JSON
 		const resp = new Response(JSON.stringify(result), {
@@ -333,7 +333,7 @@ export default {
 		const sql = postgres(env.HYPERDRIVE.connectionString)
 
 		const url = new URL(request.url);
-		
+
 		//rest of the routes and database queries
 	},
 } satisfies ExportedHandler<Env>;
@@ -349,7 +349,6 @@ npx wrangler deploy
 ```
 
 Your Worker application is now live and accessible at `<YOUR_WORKER>.<YOUR_SUBDOMAIN>.workers.dev`, using Hyperdrive. Hyperdrive accelerates database queries by pooling your connections and caching your requests across the globe.
-
 
 ## Next steps
 
